@@ -8,49 +8,56 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <bits/unique_ptr.h>
+#include "types.hpp"
 
 class conflict
 {
 protected:
-    std::vector<std::string> data;
+    types::stringVector data;
 
 public:
     int index;
 
-    conflict(std::vector<std::string> lines, int index) : data(std::move(lines)), index(index)
+    conflict(types::stringVector lines, int index) : data(std::move(lines)), index(index)
     {}
 
-    virtual std::vector<std::string> getNewLines() noexcept
+    //TODO Zrobić wersję kolorową
+    virtual types::stringVector getNewLines() noexcept
     {
         return data;
     }
-
 };
 
 class conflictSolved : public conflict
 {
 private:
-    std::vector<std::string>::iterator getCentre()
+    types::stringVector::iterator getCentre()
     {
         return std::find(data.begin(), data.end(), "=======");
     }
 
 protected:
-    std::vector<std::string> getOld()
+    types::stringVector getOld()
     {
         return {data.begin()+1, getCentre()};
     }
 
-    std::vector<std::string> getNew()
+    types::stringVector getNew()
     {
         return {getCentre()+1, data.end()-1};
     }
+
+public:
+    explicit conflictSolved(const conflict & object) : conflict(object) {};
 };
 
 class conflictOld : public conflictSolved
 {
 public:
-    std::vector<std::string> getNewLines() noexcept override
+    using conflictSolved::conflictSolved;
+
+    types::stringVector getNewLines() noexcept override
     {
         return getOld();
     }
@@ -59,7 +66,9 @@ public:
 class conflictNew : public conflictSolved
 {
 public:
-    std::vector<std::string> getNewLines() noexcept override
+    using conflictSolved::conflictSolved;
+
+    types::stringVector getNewLines() noexcept override
     {
         return getNew();
     }
@@ -68,7 +77,9 @@ public:
 class conflictBoth : public conflictSolved
 {
 public:
-    std::vector<std::string> getNewLines() noexcept override
+    using conflictSolved::conflictSolved;
+
+    types::stringVector getNewLines() noexcept override
     {
         auto front = getNew();
         auto back = getOld();
@@ -80,7 +91,9 @@ public:
 class conflictBothR : public conflictSolved
 {
 public:
-    std::vector<std::string> getNewLines() noexcept override
+    using conflictSolved::conflictSolved;
+
+    types::stringVector getNewLines() noexcept override
     {
         auto front = getOld();
         auto back = getNew();

@@ -9,21 +9,22 @@
 #include <vector>
 #include <algorithm>
 #include <bits/unique_ptr.h>
-#include "types.hpp"
+
+typedef std::vector<std::string> stringVector;
 
 class conflict
 {
 protected:
-    types::stringVector data;
+    stringVector data;
 
 public:
     int index;
 
-    conflict(types::stringVector lines, int index) : data(std::move(lines)), index(index)
+    conflict(stringVector lines, int index) : data(std::move(lines)), index(index)
     {}
 
     //TODO Zrobić wersję kolorową
-    virtual types::stringVector getNewLines() noexcept
+    virtual stringVector getNewLines() noexcept
     {
         return data;
     }
@@ -32,18 +33,18 @@ public:
 class conflictSolved : public conflict
 {
 private:
-    types::stringVector::iterator getCentre()
+    stringVector::iterator getCentre()
     {
-        return std::find(data.begin(), data.end(), "=======");
+        return std::find(data.begin(), data.end(), "=======\n");
     }
 
 protected:
-    types::stringVector getOld()
+    stringVector getOld()
     {
         return {data.begin()+1, getCentre()};
     }
 
-    types::stringVector getNew()
+    stringVector getNew()
     {
         return {getCentre()+1, data.end()-1};
     }
@@ -57,7 +58,7 @@ class conflictOld : public conflictSolved
 public:
     using conflictSolved::conflictSolved;
 
-    types::stringVector getNewLines() noexcept override
+    stringVector getNewLines() noexcept override
     {
         return getOld();
     }
@@ -68,7 +69,7 @@ class conflictNew : public conflictSolved
 public:
     using conflictSolved::conflictSolved;
 
-    types::stringVector getNewLines() noexcept override
+    stringVector getNewLines() noexcept override
     {
         return getNew();
     }
@@ -79,10 +80,10 @@ class conflictBoth : public conflictSolved
 public:
     using conflictSolved::conflictSolved;
 
-    types::stringVector getNewLines() noexcept override
+    stringVector getNewLines() noexcept override
     {
-        auto front = getNew();
-        auto back = getOld();
+        auto front = getOld();
+        auto back = getNew();
         front.insert(front.end(), back.begin(), back.end());
         return front;
     }
@@ -93,13 +94,15 @@ class conflictBothR : public conflictSolved
 public:
     using conflictSolved::conflictSolved;
 
-    types::stringVector getNewLines() noexcept override
+    stringVector getNewLines() noexcept override
     {
-        auto front = getOld();
-        auto back = getNew();
+        auto front = getNew();
+        auto back = getOld();
         front.insert(front.end(), back.begin(), back.end());
         return front;
     }
 };
+
+typedef std::vector<std::shared_ptr<conflict>> conflictsVector;
 
 #endif //MERGE_CONFLICTS_RESOLVER_CONFLICTS_HPP

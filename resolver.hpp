@@ -12,7 +12,9 @@
 class resolver
 {
 private:
-    parsedCode instance = parsedCode(types::stringVector(), types::conflictsVector());
+
+
+    parsedCode instance = parsedCode(stringVector(), conflictsVector());
     int currentConflictIndex = 0;
 
 public:

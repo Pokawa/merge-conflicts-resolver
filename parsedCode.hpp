@@ -10,28 +10,27 @@
 #include <string>
 #include <memory>
 #include "conflicts.hpp"
-#include "types.hpp"
 
 class parsedCode
 {
 private:
-    types::stringVector code;
-    types::conflictsVector conflicts;
+    stringVector code;
+    conflictsVector conflicts;
 
 public:
-    parsedCode(types::stringVector code, types::conflictsVector conflicts) : code(std::move(code)), conflicts(std::move(conflicts)) {}
+    parsedCode(stringVector code, conflictsVector conflicts) : code(std::move(code)), conflicts(std::move(conflicts)) {}
 
 
-    types::stringVector getLines()
+    stringVector getLines()
     {
         auto copy{code};
 
-        auto insertToCopy = [&copy](conflict* item){
+        auto insertToCopy = [&copy](const std::shared_ptr<conflict>& item){
             auto newLines = item->getNewLines();
             copy.insert(copy.begin() + item->index, newLines.begin(), newLines.end());
         };
 
-        std::for_each(conflicts.begin(), conflicts.end(), insertToCopy);
+        std::for_each(conflicts.rbegin(), conflicts.rend(), insertToCopy);
 
         return copy;
     }
@@ -44,27 +43,27 @@ public:
 
     void revertConflict(unsigned const int index)
     {
-        conflicts[index] = std::make_unique<conflict>(*conflicts[index]);
+        conflicts[index] = std::make_shared<conflict>(*conflicts[index]);
     }
 
     void mergeToOld(unsigned const int index)
     {
-        conflicts[index] = std::make_unique<conflictOld>(*conflicts[index]);
+        conflicts[index] = std::make_shared<conflictOld>(*conflicts[index]);
     }
 
     void mergeToNew(unsigned const int index)
     {
-        conflicts[index] = std::make_unique<conflictNew>(*conflicts[index]);
+        conflicts[index] = std::make_shared<conflictNew>(*conflicts[index]);
     }
 
     void mergeToBoth(unsigned const int index)
     {
-        conflicts[index] = std::make_unique<conflictBoth>(*conflicts[index]);
+        conflicts[index] = std::make_shared<conflictBoth>(*conflicts[index]);
     }
 
     void mergeToBothR(unsigned const int index)
     {
-        conflicts[index] = std::make_unique<conflictBothR>(*conflicts[index]);
+        conflicts[index] = std::make_shared<conflictBothR>(*conflicts[index]);
     }
 };
 

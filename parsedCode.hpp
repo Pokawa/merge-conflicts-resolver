@@ -20,7 +20,6 @@ private:
 public:
     parsedCode(stringVector code, conflictsVector conflicts) : code(std::move(code)), conflicts(std::move(conflicts)) {}
 
-
     stringVector getLines()
     {
         auto copy{code};
@@ -49,6 +48,13 @@ public:
         std::for_each(conflicts.rbegin(), conflicts.rend(), insertColored);
 
         return out;
+    }
+
+    unsigned int getConflictPosition(unsigned const int index)
+    {
+        auto position = conflicts[index]->index;
+        std::for_each(conflicts.begin(), conflicts.begin() + index, [&position](const std::shared_ptr<conflict> & item){ position += item->index; });
+        return position;
     }
 
     int conflictsSize()

@@ -8,17 +8,19 @@
 #include "parsedCode.hpp"
 #include "parser.hpp"
 #include "fileHandler.hpp"
+#include "printHandler.hpp"
 
 class resolver
 {
 private:
-
-
-    parsedCode instance = parsedCode(stringVector(), conflictsVector());
-    int currentConflictIndex = 0;
+    parsedCode instance;
+    printHandler printer;
+    coloredStringVector printingData;
+    int currentConflictIndex;
+    int currentPrintingPosition;
 
 public:
-    explicit resolver()
+    explicit resolver() : instance(stringVector(), conflictsVector()), currentConflictIndex(0)
     {
     }
 
@@ -26,6 +28,8 @@ public:
     {
         auto lines = readLinesFromFile(filename);
         instance = parseConflicts(lines);
+        refreshPrintingData();
+        getPrintingIndex();
     }
 
     void save(const std::string& filename)
@@ -34,12 +38,32 @@ public:
         writeLinesToFile(newLines, filename);
     }
 
+    void printToTerminal()
+    {
+        printer.printOnScreen(printingData, currentPrintingPosition);
+    }
+
+    void nextLine()
+    {
+        currentPrintingPosition++;
+        //TODO blokada
+    }
+
+    void previousLine()
+    {
+        currentPrintingPosition--;
+        if (currentPrintingPosition < 0)
+            currentPrintingPosition = 0;
+    }
+
     void nextConflict()
     {
         currentConflictIndex++;
 
         if (currentConflictIndex >= instance.conflictsSize())
             currentConflictIndex = 0;
+
+        getPrintingIndex();
     }
 
     void previousConflict()
@@ -48,31 +72,49 @@ public:
 
         if (currentConflictIndex < 0)
             currentConflictIndex = instance.conflictsSize();
+
+        getPrintingIndex();
     }
 
     void revertCurrent()
     {
         instance.revertConflict(currentConflictIndex);
+        refreshPrintingData();
     }
 
     void mergeCurrentToOld()
     {
         instance.mergeToOld(currentConflictIndex);
+        refreshPrintingData();
     }
 
     void mergeCurrentToNew()
     {
         instance.mergeToNew(currentConflictIndex);
+        refreshPrintingData();
     }
 
     void mergeCurrentToBoth()
     {
         instance.mergeToBoth(currentConflictIndex);
+        refreshPrintingData();
     }
 
     void mergeCurrentToBothR()
     {
         instance.mergeToBothR(currentConflictIndex);
+        refreshPrintingData();
+    }
+
+private:
+    void getPrintingIndex()
+    {
+        currentPrintingPosition = instance.getConflictPosition(currentConflictIndex);
+    }
+
+    void refreshPrintingData()
+    {
+        printingData = instance.getLinesColored();
     }
 };
 

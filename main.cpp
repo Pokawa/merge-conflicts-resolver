@@ -3,13 +3,27 @@
 //
 
 #include "resolver.hpp"
+#include <ncurses.h>
 
 int main()
 {
-    stringVector lines = {"<<<<<<<\n", "123\n", "=======\n", "456\n",  ">>>>>>>\n"};
-    auto a = std::make_shared<conflict>(lines, 0);
-    std::shared_ptr<conflict> l = std::make_shared<conflictNew>(*a);
-    auto b = l->getNewLines();
+    initscr();
+    refresh();
+    resolver a;
+    a.load("tmp.cpp");
+    a.mergeCurrentToBoth();
+    a.printToTerminal();
+    getch();
+    a.revertCurrent();
+    a.printToTerminal();
+    getch();
+    a.mergeCurrentToBothR();
+    a.printToTerminal();
+    getch();
+    a.mergeCurrentToNew();
+    a.printToTerminal();
+    getch();
+    endwin();
     return 0;
 }
 

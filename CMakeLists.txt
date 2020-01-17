@@ -8,6 +8,6 @@ include_directories(base)
 add_subdirectory(tests)
 
 add_executable(merge_conflicts_resolver
-        main.cpp fileHandler.hpp parser.hpp conflicts.hpp parsedCode.hpp resolver.hpp)
+        main.cpp fileHandler.hpp parser.hpp conflicts.hpp parsedCode.hpp resolver.hpp coloredString.hpp)
 
 

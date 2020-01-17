@@ -25,16 +25,31 @@ public:
     {
         auto copy{code};
 
-        auto insertToCopy = [&copy](const std::shared_ptr<conflict>& item){
+        auto insert = [&copy](const std::shared_ptr<conflict>& item){
             auto newLines = item->getNewLines();
             copy.insert(copy.begin() + item->index, newLines.begin(), newLines.end());
         };
 
-        std::for_each(conflicts.rbegin(), conflicts.rend(), insertToCopy);
+        std::for_each(conflicts.rbegin(), conflicts.rend(), insert);
 
         return copy;
     }
-    //TODO Zrobić wersję kolorową
+
+    coloredStringVector getLinesColored()
+    {
+        coloredStringVector out{};
+
+        std::transform(code.begin(), code.end(), std::back_inserter(out), [](const std::string & line) -> coloredString { return {line, textColor::WhiteText};});
+
+        auto insertColored = [&out](const std::shared_ptr<conflict>& item){
+            auto newLines = item->getNewLinesColored();
+            out.insert(out.begin() + item->index, newLines.begin(), newLines.end());
+        };
+
+        std::for_each(conflicts.rbegin(), conflicts.rend(), insertColored);
+
+        return out;
+    }
 
     int conflictsSize()
     {
@@ -43,27 +58,35 @@ public:
 
     void revertConflict(unsigned const int index)
     {
-        conflicts[index] = std::make_shared<conflict>(*conflicts[index]);
+        convertConflict<conflict>(index);
     }
 
     void mergeToOld(unsigned const int index)
     {
-        conflicts[index] = std::make_shared<conflictOld>(*conflicts[index]);
+        convertConflict<conflictOld>(index);
     }
 
     void mergeToNew(unsigned const int index)
     {
-        conflicts[index] = std::make_shared<conflictNew>(*conflicts[index]);
+        convertConflict<conflictNew>(index);
     }
 
     void mergeToBoth(unsigned const int index)
     {
-        conflicts[index] = std::make_shared<conflictBoth>(*conflicts[index]);
+        convertConflict<conflictBoth>(index);
     }
 
     void mergeToBothR(unsigned const int index)
     {
-        conflicts[index] = std::make_shared<conflictBothR>(*conflicts[index]);
+        convertConflict<conflictBothR>(index);
+    }
+
+private:
+
+    template <class targetType>
+    void convertConflict(unsigned const int index)
+    {
+        conflicts[index] = std::make_shared<targetType>(*conflicts[index]);
     }
 };
 

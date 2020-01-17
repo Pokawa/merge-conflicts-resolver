@@ -16,7 +16,6 @@ std::vector<std::string> readLinesFromFile(const std::string& filename)
     std::vector<std::string> data;
 
     for (std::string buff; std::getline(file,buff);) {
-        buff.push_back('\n');
         data.emplace_back(std::move(buff));
     }
 

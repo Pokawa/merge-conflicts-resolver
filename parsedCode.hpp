@@ -16,9 +16,10 @@ class parsedCode
 private:
     stringVector code;
     conflictsVector conflicts;
+    int selected;
 
 public:
-    parsedCode(stringVector code, conflictsVector conflicts) : code(std::move(code)), conflicts(std::move(conflicts)) {}
+    parsedCode(stringVector code, conflictsVector conflicts) : code(std::move(code)), conflicts(std::move(conflicts)), selected(0) {}
 
     stringVector getLines()
     {
@@ -53,8 +54,35 @@ public:
     unsigned int getConflictPosition(unsigned const int index)
     {
         auto position = conflicts[index]->index;
-        std::for_each(conflicts.begin(), conflicts.begin() + index, [&position](const std::shared_ptr<conflict> & item){ position += item->index; });
+        std::for_each(conflicts.begin(), conflicts.begin() + index, [&position](const std::shared_ptr<conflict> & item){ position += item->getNewLines().size(); });
         return position;
+    }
+
+    std::vector<int> findPattern(const std::string & pattern)
+    {
+
+        std::vector<int> out{};
+        for (int i = 0; i < conflicts.size(); i++)
+        {
+            auto pos = conflicts[i]->contains(pattern);
+            //TODO obsluga paru znalezienie w jednym konflikcie
+            //out.insert(out.end(), positions.begin(), positions.end());
+            if (pos != -1)
+                out.push_back(pos + getConflictPosition(i));
+        }
+        return out;
+    }
+
+    void selectConflict(unsigned const int index)
+    {
+        conflicts[selected]->selected = false;
+        selected = index;
+        conflicts[index]->selected = true;
+    }
+
+    unsigned int getTotalLength()
+    {
+        return getLines().size();
     }
 
     int conflictsSize()

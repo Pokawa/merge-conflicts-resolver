@@ -21,6 +21,21 @@ private:
         return std::find(data.begin(), data.end(), "=======");
     }
 
+    textColor newColor()
+    {
+        return selected ? textColor::BlueText : textColor::WhiteText;
+    }
+
+    textColor oldColor()
+    {
+        return selected ? textColor::CyanText : textColor::WhiteText;
+    }
+
+    textColor signsColor()
+    {
+        return selected ? textColor::RedText : textColor::WhiteText;
+    }
+
 protected:
     stringVector data;
 
@@ -39,7 +54,7 @@ protected:
         auto lines = getOld();
         coloredStringVector out{};
 
-        std::transform(lines.begin(), lines.end(), std::back_inserter(out), [](const std::string & line)-> coloredString { return {line, textColor::YellowText};});
+        std::transform(lines.begin(), lines.end(), std::back_inserter(out), [this](const std::string & line)-> coloredString { return {line, this->oldColor()};});
         return out;
     }
 
@@ -48,14 +63,15 @@ protected:
         auto lines = getNew();
         coloredStringVector out{};
 
-        std::transform(lines.begin(), lines.end(), std::back_inserter(out), [](const std::string & line)-> coloredString { return {line, textColor::BlueText};});
+        std::transform(lines.begin(), lines.end(), std::back_inserter(out), [this](const std::string & line)-> coloredString { return {line, this->newColor()};});
         return out;
     }
 
 public:
     int index;
+    bool selected;
 
-    conflict(stringVector lines, int index) : data(std::move(lines)), index(index)
+    conflict(stringVector lines, int index) : data(std::move(lines)), index(index), selected(false)
     {}
 
     virtual stringVector getNewLines() noexcept
@@ -65,7 +81,7 @@ public:
 
     virtual coloredStringVector getNewLinesColored() noexcept
     {
-        coloredStringVector out{{data.front(), textColor::RedText}, {"=======", textColor::RedText}, {data.back(), textColor::RedText}};
+        coloredStringVector out{{data.front(), this->signsColor()}, {"=======", this->signsColor()}, {data.back(), this->signsColor()}};
 
         auto newLines = getNewColored();
         auto oldLines = getOldColored();
@@ -74,6 +90,21 @@ public:
         out.insert(out.end()-1, newLines.begin(), newLines.end());
 
         return out;
+    }
+
+    int contains(std::string pattern)
+    {
+        auto lines = getNewLines();
+        auto toLower = [](std::string & line){ std::for_each(line.begin(), line.end(), [](char & c){ c = std::tolower(c); });};
+        auto containsPattern = [&toLower, &pattern](std::string & line) { toLower(line);  return line.find(pattern) != std::string::npos; };
+
+        toLower(pattern);
+        //TODO obsluga paru znalezienie w jednym konflikcie
+        auto pos = std::find_if(lines.begin(), lines.end(), containsPattern);
+
+        if (pos == lines.end())
+            return -1;
+        return pos - lines.begin();
     }
 };
 

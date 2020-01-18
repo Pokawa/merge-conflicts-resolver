@@ -41,6 +41,20 @@ TEST(Conflicts, Polymorthism) {
     ASSERT_EQ(foo->getNewLines(), lines);
 }
 
+TEST(Conflicts, Contains)
+{
+    stringVector lines = {"<<<<<<<", "123", "321", "=======", "abc", "756",  ">>>>>>>"};
+
+    auto foo = std::make_shared<conflict>(lines, 0);
+    ASSERT_EQ(foo->contains("lk"), -1);
+    ASSERT_EQ(foo->contains("12"), 1);
+    ASSERT_EQ(foo->contains("AbC"), 4);
+
+    foo = std::make_shared<conflictNew>(*foo);
+    ASSERT_EQ(foo->contains("6"), 1);
+    ASSERT_EQ(foo->contains("123"), -1);
+}
+
 TEST(Conflicts, PolymorthismAndColors) {
     coloredString o = {"123", textColor::YellowText};
     coloredString n = {"456", textColor::BlueText};

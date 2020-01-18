@@ -18,16 +18,19 @@ private:
     coloredStringVector printingData;
     int currentConflictIndex;
     int currentPrintingPosition;
+    std::vector<int> foundPositions;
+    int currentFoundIndex;
 
 public:
-    explicit resolver() : instance(stringVector(), conflictsVector()), currentConflictIndex(0)
-    {
-    }
+    explicit resolver() : instance(stringVector(), conflictsVector()), currentConflictIndex(0), foundPositions(), currentPrintingPosition(0)
+    {}
 
     void load(const std::string& filename)
     {
         auto lines = readLinesFromFile(filename);
         instance = parseConflicts(lines);
+        printer.setup(instance.getTotalLength());
+        selectCurrentConflict();
         refreshPrintingData();
         getPrintingIndex();
     }
@@ -38,6 +41,29 @@ public:
         writeLinesToFile(newLines, filename);
     }
 
+    void find(const std::string & pattern)
+    {
+        foundPositions = instance.findPattern(pattern);
+        currentFoundIndex = 0;
+        setPrintingPositionFromFound();
+    }
+
+    void nextFound()
+    {
+        currentFoundIndex++;
+
+        if (currentFoundIndex >= foundPositions.size())
+            currentFoundIndex = 0;
+    }
+
+    void previousFound()
+    {
+        currentFoundIndex--;
+
+        if (currentFoundIndex < 0)
+            currentFoundIndex = foundPositions.size();
+    }
+
     void printToTerminal()
     {
         printer.printOnScreen(printingData, currentPrintingPosition);
@@ -45,8 +71,8 @@ public:
 
     void nextLine()
     {
-        currentPrintingPosition++;
-        //TODO blokada
+        if (currentPrintingPosition < printingData.size() - 1)
+            currentPrintingPosition++;
     }
 
     void previousLine()
@@ -63,7 +89,9 @@ public:
         if (currentConflictIndex >= instance.conflictsSize())
             currentConflictIndex = 0;
 
+        selectCurrentConflict();
         getPrintingIndex();
+        refreshPrintingData();
     }
 
     void previousConflict()
@@ -71,9 +99,20 @@ public:
         currentConflictIndex--;
 
         if (currentConflictIndex < 0)
-            currentConflictIndex = instance.conflictsSize();
+            currentConflictIndex = instance.conflictsSize() - 1;
 
+        selectCurrentConflict();
         getPrintingIndex();
+        refreshPrintingData();
+    }
+
+    void jumpToConflict(int index)
+    {
+        if (index <= instance.conflictsSize())
+            currentConflictIndex = index;
+
+        instance.selectConflict(index);
+        refreshPrintingData();
     }
 
     void revertCurrent()
@@ -107,15 +146,23 @@ public:
     }
 
 private:
+
     void getPrintingIndex()
     {
         currentPrintingPosition = instance.getConflictPosition(currentConflictIndex);
     }
-
     void refreshPrintingData()
     {
         printingData = instance.getLinesColored();
     }
+
+    void setPrintingPositionFromFound()
+    {
+        if (!foundPositions.empty())
+            currentPrintingPosition = foundPositions[currentFoundIndex];
+    }
+
+    void selectCurrentConflict() { instance.selectConflict(currentConflictIndex); }
 };
 
 #endif //MERGE_CONFLICTS_RESOLVER_RESOLVER_HPP

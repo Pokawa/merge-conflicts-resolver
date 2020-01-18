@@ -11,18 +11,29 @@ int main()
     refresh();
     resolver a;
     a.load("tmp.cpp");
-    a.mergeCurrentToBoth();
-    a.printToTerminal();
-    getch();
-    a.revertCurrent();
-    a.printToTerminal();
-    getch();
-    a.mergeCurrentToBothR();
-    a.printToTerminal();
-    getch();
-    a.mergeCurrentToNew();
-    a.printToTerminal();
-    getch();
+//    a.nextConflict();
+//    a.mergeCurrentToBoth();
+//    a.previousConflict();
+    for (;;) {
+        a.printToTerminal();
+        switch (getch())
+        {
+            case 'j':
+                a.previousLine();
+                break;
+            case 'k':
+                a.nextLine();
+                break;
+            case 'l':
+                a.previousConflict();
+                break;
+            case ';':
+                a.nextConflict();
+                break;
+            default:
+                break;
+        }
+    }
     endwin();
     return 0;
 }

@@ -9,7 +9,7 @@
 #include <vector>
 #include <string>
 
-enum textColor {RedText, YellowText, BlueText, WhiteText};
+enum textColor {RedText = 10, YellowText, BlueText, WhiteText, CyanText};
 
 struct coloredString
 {

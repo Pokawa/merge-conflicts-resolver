@@ -18,11 +18,11 @@ private:
     coloredStringVector printingData;
     int currentConflictIndex;
     int currentPrintingPosition;
-    std::vector<int> foundPositions;
+    std::vector<std::pair<int,int>> foundPositions;
     int currentFoundIndex;
 
 public:
-    explicit resolver() : instance(stringVector(), conflictsVector()), currentConflictIndex(0), foundPositions(), currentPrintingPosition(0)
+    explicit resolver() : instance(stringVector(), conflictsVector()), currentConflictIndex(-1), foundPositions(), currentPrintingPosition(0)
     {}
 
     void load(const std::string& filename)
@@ -30,9 +30,9 @@ public:
         auto lines = readLinesFromFile(filename);
         instance = parseConflicts(lines);
         printer.setup(instance.getTotalLength());
-        selectCurrentConflict();
+//        selectCurrentConflict();
         refreshPrintingData();
-        getPrintingIndex();
+//        getPrintingIndex();
     }
 
     void save(const std::string& filename)
@@ -46,6 +46,7 @@ public:
         foundPositions = instance.findPattern(pattern);
         currentFoundIndex = 0;
         setPrintingPositionFromFound();
+        refreshPrintingData();
     }
 
     void nextFound()
@@ -54,6 +55,9 @@ public:
 
         if (currentFoundIndex >= foundPositions.size())
             currentFoundIndex = 0;
+
+        setPrintingPositionFromFound();
+        refreshPrintingData();
     }
 
     void previousFound()
@@ -61,7 +65,10 @@ public:
         currentFoundIndex--;
 
         if (currentFoundIndex < 0)
-            currentFoundIndex = foundPositions.size();
+            currentFoundIndex = foundPositions.size() - 1;
+
+        setPrintingPositionFromFound();
+        refreshPrintingData();
     }
 
     void printToTerminal()
@@ -84,26 +91,30 @@ public:
 
     void nextConflict()
     {
-        currentConflictIndex++;
+        if (instance.conflictsSize() > 0) {
+            currentConflictIndex++;
 
-        if (currentConflictIndex >= instance.conflictsSize())
-            currentConflictIndex = 0;
+            if (currentConflictIndex >= instance.conflictsSize())
+                currentConflictIndex = 0;
 
-        selectCurrentConflict();
-        getPrintingIndex();
-        refreshPrintingData();
+            selectCurrentConflict();
+            getPrintingIndex();
+            refreshPrintingData();
+        }
     }
 
     void previousConflict()
     {
-        currentConflictIndex--;
+        if (instance.conflictsSize() > 0) {
+            currentConflictIndex--;
 
-        if (currentConflictIndex < 0)
-            currentConflictIndex = instance.conflictsSize() - 1;
+            if (currentConflictIndex < 0)
+                currentConflictIndex = instance.conflictsSize() - 1;
 
-        selectCurrentConflict();
-        getPrintingIndex();
-        refreshPrintingData();
+            selectCurrentConflict();
+            getPrintingIndex();
+            refreshPrintingData();
+        }
     }
 
     void jumpToConflict(int index)
@@ -111,7 +122,8 @@ public:
         if (index <= instance.conflictsSize())
             currentConflictIndex = index;
 
-        instance.selectConflict(index);
+        selectCurrentConflict();
+        getPrintingIndex();
         refreshPrintingData();
     }
 
@@ -158,8 +170,11 @@ private:
 
     void setPrintingPositionFromFound()
     {
-        if (!foundPositions.empty())
-            currentPrintingPosition = foundPositions[currentFoundIndex];
+        if (!foundPositions.empty()) {
+            currentPrintingPosition = foundPositions[currentFoundIndex].second;
+            currentConflictIndex = foundPositions[currentFoundIndex].first;
+            selectCurrentConflict();
+        }
     }
 
     void selectCurrentConflict() { instance.selectConflict(currentConflictIndex); }

@@ -58,17 +58,13 @@ public:
         return position;
     }
 
-    std::vector<int> findPattern(const std::string & pattern)
+    std::vector<std::pair<int, int>> findPattern(const std::string & pattern)
     {
-
-        std::vector<int> out{};
+        std::vector<std::pair<int,int>> out{};
         for (int i = 0; i < conflicts.size(); i++)
         {
-            auto pos = conflicts[i]->contains(pattern);
-            //TODO obsluga paru znalezienie w jednym konflikcie
-            //out.insert(out.end(), positions.begin(), positions.end());
-            if (pos != -1)
-                out.push_back(pos + getConflictPosition(i));
+            auto positions = conflicts[i]->contains(pattern);
+            std::transform(positions.begin(), positions.end(), std::back_inserter(out), [i, this](const int & position) -> std::pair<int,int> { return std::make_pair(i, position + this->getConflictPosition(i));});
         }
         return out;
     }

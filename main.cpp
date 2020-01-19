@@ -10,7 +10,8 @@ int main()
     initscr();
     refresh();
     resolver a;
-    a.load("tmp.cpp");
+    a.load("tmp1.cpp");
+//    a.find("code");
 //    a.nextConflict();
 //    a.mergeCurrentToBoth();
 //    a.previousConflict();
@@ -29,6 +30,15 @@ int main()
                 break;
             case ';':
                 a.nextConflict();
+                break;
+            case 'f':
+                a.find("code");
+                break;
+            case 'g':
+                a.nextFound();
+                break;
+            case 'h':
+                a.previousFound();
                 break;
             default:
                 break;

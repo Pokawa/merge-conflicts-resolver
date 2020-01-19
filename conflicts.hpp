@@ -92,19 +92,25 @@ public:
         return out;
     }
 
-    int contains(std::string pattern)
+    std::vector<int> contains(std::string pattern)
     {
+        std::vector<int> out{};
+
         auto lines = getNewLines();
         auto toLower = [](std::string & line){ std::for_each(line.begin(), line.end(), [](char & c){ c = std::tolower(c); });};
         auto containsPattern = [&toLower, &pattern](std::string & line) { toLower(line);  return line.find(pattern) != std::string::npos; };
 
         toLower(pattern);
-        //TODO obsluga paru znalezienie w jednym konflikcie
-        auto pos = std::find_if(lines.begin(), lines.end(), containsPattern);
 
-        if (pos == lines.end())
-            return -1;
-        return pos - lines.begin();
+        auto iter = lines.begin();
+        while (iter < lines.end()) {
+            iter = std::find_if(iter, lines.end(), containsPattern);
+            if (iter < lines.end())
+                 out.push_back(iter - lines.begin());
+            iter++;
+        }
+
+        return out;
     }
 };
 

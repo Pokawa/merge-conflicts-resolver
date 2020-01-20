@@ -10,7 +10,7 @@ include_directories(${CURSES_INCLUDE_DIR})
 add_subdirectory(tests)
 
 add_executable(mcr
-        main.cpp fileHandler.hpp parser.hpp conflicts.hpp parsedCode.hpp resolver.hpp coloredString.hpp printHandler.hpp)
+        main.cpp fileHandler.hpp parser.hpp conflicts.hpp parsedCode.hpp resolver.hpp coloredString.hpp printHandler.hpp mergeAid.hpp frontend.hpp backend.hpp)
 
 target_link_libraries(mcr ${CURSES_LIBRARIES})
 

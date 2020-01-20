@@ -129,30 +129,40 @@ public:
 
     void revertCurrent()
     {
+        if (currentConflictIndex == -1)
+            return;
         instance.revertConflict(currentConflictIndex);
         refreshPrintingData();
     }
 
     void mergeCurrentToOld()
     {
+        if (currentConflictIndex == -1)
+            return;
         instance.mergeToOld(currentConflictIndex);
         refreshPrintingData();
     }
 
     void mergeCurrentToNew()
     {
+        if (currentConflictIndex == -1)
+            return;
         instance.mergeToNew(currentConflictIndex);
         refreshPrintingData();
     }
 
     void mergeCurrentToBoth()
     {
+        if (currentConflictIndex == -1)
+            return;
         instance.mergeToBoth(currentConflictIndex);
         refreshPrintingData();
     }
 
     void mergeCurrentToBothR()
     {
+        if (currentConflictIndex == -1)
+            return;
         instance.mergeToBothR(currentConflictIndex);
         refreshPrintingData();
     }

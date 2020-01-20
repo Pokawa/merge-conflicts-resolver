@@ -53,6 +53,9 @@ public:
 
     void printOnScreen(const coloredStringVector & lines, unsigned int index)
     {
+        if (terminalResized())
+            resizeWindows();
+
         clearWindows();
         printToWindows(lines, index);
         refreshWindows();
@@ -100,6 +103,18 @@ private:
         digits = getNoDigits(fileLinesCount);
     }
 
+    void resizeWindows()
+    {
+        wresize(codeWindow, LINES - 2, COLS);
+        wresize(numberWindow, LINES - 2, digits+1);
+    }
+
+    bool terminalResized()
+    {
+        auto x = getmaxx(codeWindow);
+        auto y = getmaxy(codeWindow);
+        return x != COLS or y != LINES - 2;
+    }
 
 };
 
